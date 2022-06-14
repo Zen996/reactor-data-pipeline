@@ -9,20 +9,26 @@ class rInputs:
         self.type = type
         self.time=time
 
-    def flow(self):
-        if self.type == "sin":
+    def sin_flow(self,type_arr,time,conc):
+        return conc*type_arr(time)
+
     
-        elif self.type == "cos":
+    
+    def manage_flow(self,type_arr):
+        if self.type == "sin":
+            self.sin_flow(self,type_arr,self.time,self.conc)
+        # elif self.type == "cos":
 
-        elif self.type == "heaviside_step":
+        # elif self.type == "heaviside_step":
 
-        elif self.type == "sigmoid":
+        # elif self.type == "sigmoid":
 
-        elif self.type == "modsin":
+        # elif self.type == "modsin":
 
-        elif self.type == "modcos":
+        # elif self.type == "modcos":
 
-        elif self.type == "linear_step":
+        # elif self.type == "linear_step":
+    
 
         
 
