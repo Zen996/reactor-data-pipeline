@@ -44,6 +44,12 @@ inflow_rate = flow_signal(t) × composition_signal(t)
 > its own independent concentration signal.  If you want fractional
 > feed, set each species' concentration to your desired fraction and
 > ensure they are dimensionally consistent.
+>
+> **Composition and flow signal are different physical dimensions.**
+> The flow signal is a volumetric rate (e.g. L/s), while composition is
+> concentration (e.g. mol/L).  Their numerical values are not directly
+> comparable — a composition of 2.0 with a flow of 0.5 simply gives an
+> inflow rate of 1.0 mol/s.
 
 ### Signals
 
@@ -80,9 +86,13 @@ The rate constant `k` controls reaction speed.  The reaction rate is:
 rate = k × [A]^order_A × [B]^order_B × ...
 ```
 
-where `[X]` is the concentration of species X.  Reaction rate is clamped
-so no reactant goes negative.  All reactions are **liquid-phase only**
-(see `KNOWN_ISSUES.md`).
+where `[X]` is the **concentration** of species X (`liquid.X / volume`).
+The per-step change in absolute quantity is `coeff × rate × dt × volume`,
+so `k` has units of `(concentration)^(1-n) / time` for an n-th-order
+reaction (e.g. `1/s` for first order, `L/(mol·s)` for second order).
+
+Reaction rate is clamped so no reactant goes negative.  All reactions
+are **liquid-phase only** (see `KNOWN_ISSUES.md`).
 
 ### Decays
 
