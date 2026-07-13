@@ -38,6 +38,13 @@ The actual inflow of a species at any time is:
 inflow_rate = flow_signal(t) × composition_signal(t)
 ```
 
+> **Composition values are absolute concentrations**, not fractions.
+> They are in the same arbitrary units as the reactor state (e.g. mol/L
+> or kg/m³).  They do **not** need to sum to 1.0 — each species gets
+> its own independent concentration signal.  If you want fractional
+> feed, set each species' concentration to your desired fraction and
+> ensure they are dimensionally consistent.
+
 ### Signals
 
 Both flow rates and composition concentrations are defined by **signals**
@@ -165,10 +172,14 @@ show/hide individual streams.
 
 Multi-select any combination of columns to plot:
 
-- `liquid.<species>` — Quantity of each species in the liquid phase
-- `vapor.<species>` — Quantity in the vapour phase
-- `outlet.<species>` — Outlet mass flow rate (volumetric outflow ×
-  concentration) for each species
+- `liquid.<species>` — **Quantity** (mass or moles) of that species
+  currently in the reactor's liquid phase at that instant
+- `vapor.<species>` — Same for the vapour phase
+- `outlet.<species>` — **Outlet mass flow rate** (mass/time or
+  moles/time) of the species leaving the reactor.  Calculated as:
+  `outflow_rate × (liquid.<species> / volume)`.  This is a **rate**,
+  not a quantity — compare with `liquid.<species>` which is the tank
+  inventory.
 - `derived.stream.<name>.flow_rate` — Same as the input-stream chart
 - `derived.stream.<name>.inflow.<species>` — Inflow rate of a species
   from a specific stream (flow × composition)
@@ -194,7 +205,7 @@ computed during each timestep for monitoring and analysis.  They do
 |---|---|---|
 | `derived.stream.<name>.flow_rate` | MixingProcess | Volumetric flow rate of a feed stream |
 | `derived.stream.<name>.inflow.<species>` | MixingProcess | Inflow rate of a species via a feed stream |
-| `derived.outlet.<species>` | MixingProcess | Species mass flow rate leaving the reactor |
+| `derived.outlet.<species>` | MixingProcess | **Outlet mass flow rate** (mass/time or moles/time). `outflow_rate × liquid_qty / volume`. This is a **rate**, distinct from `liquid.<species>` which is the tank inventory. |
 | `derived.reaction_rate_<i>` | ReactionProcess | Reaction progress per unit time (conc/s) |
 | `derived.decay_rate_<species>` | DecayProcess | Decay rate (conc/s), first-order |
 | `derived.equilibrium_net_<species>` | EquilibriumProcess | Net liquid→vapour transfer rate (conc/s) |
