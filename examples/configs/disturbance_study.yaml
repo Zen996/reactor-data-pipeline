@@ -54,4 +54,4 @@ sensors:
 dt: 0.5
 duration: 100.0
 seed: 7
-volume: 1.0
+max_volume: 1.0

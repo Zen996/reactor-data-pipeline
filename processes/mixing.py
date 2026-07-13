@@ -34,9 +34,11 @@ class MixingProcess(Process):
         self,
         streams: list[InputStream],
         outflow_rate: Signal | float | None = None,
+        min_volume: float = 0.0,
     ) -> None:
         self._streams = list(streams)
         self._outflow_rate = outflow_rate
+        self._min_volume = min_volume
 
     def execute(self, state, dt: float) -> None:
         t = state.time
@@ -65,7 +67,9 @@ class MixingProcess(Process):
                 state.add(species, qty_added, phase=stream.phase)
 
         # --- 2.  Resolve outflow ---
-        if self._outflow_rate is None:
+        if state.volume <= self._min_volume:
+            outflow = 0.0
+        elif self._outflow_rate is None:
             outflow = total_in
         elif isinstance(self._outflow_rate, (int, float)):
             outflow = float(self._outflow_rate)

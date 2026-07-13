@@ -199,8 +199,12 @@ def render() -> SimulationConfig | None:
             "Duration", value=20.0, min_value=0.1, key="sim_duration"
         )
         seed = st.number_input("Seed", value=42, min_value=0, key="sim_seed")
-        volume = st.number_input(
-            "Volume", value=1.0, min_value=0.001, key="sim_volume"
+        max_volume = st.number_input(
+            "Max volume", value=1.0, min_value=0.001, key="sim_max_volume"
+        )
+        min_volume = st.number_input(
+            "Min volume (outflow starts above this)", value=0.0, min_value=0.0,
+            key="sim_min_volume",
         )
 
         _validate_names(species_list, stream_list)
@@ -220,7 +224,8 @@ def render() -> SimulationConfig | None:
                 dt=dt,
                 duration=duration,
                 seed=seed,
-                volume=volume,
+                max_volume=max_volume,
+                min_volume=min_volume,
             )
     return None
 
@@ -400,7 +405,8 @@ def prefill_session_state(cfg: dict) -> None:
     ss["sim_dt"] = cfg.get("dt", 0.5)
     ss["sim_duration"] = cfg.get("duration", 20.0)
     ss["sim_seed"] = cfg.get("seed", 42)
-    ss["sim_volume"] = cfg.get("volume", 1.0)
+    ss["sim_max_volume"] = cfg.get("max_volume", cfg.get("volume", 1.0))
+    ss["sim_min_volume"] = cfg.get("min_volume", 0.0)
 
 
 def _prefill_signal_params(ss: dict, prefix: str, spec: dict) -> None:

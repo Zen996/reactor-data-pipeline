@@ -31,11 +31,30 @@ def render(experiment) -> None:
         else:
             st.caption("(no streams selected)")
 
+    # --- Outlet section (separate chart) ---
+    outlet_cols = [c for c in df.columns if c.startswith("derived.outlet.")]
+    if outlet_cols:
+        st.subheader("Outlet")
+        outlet_species = sorted(set(c.split(".", 2)[2] for c in outlet_cols))
+        selected_outlet = []
+        for sp_name in outlet_species:
+            col_key = f"chart_show_outlet_{sp_name}"
+            if col_key not in st.session_state:
+                st.session_state[col_key] = True
+            if st.checkbox(sp_name, value=True, key=col_key):
+                selected_outlet.append(sp_name)
+        if selected_outlet:
+            cols_to_plot = [f"derived.outlet.{s}" for s in selected_outlet]
+            fig, ax = plot_timeseries(df, cols_to_plot)
+            st.pyplot(fig)
+        else:
+            st.caption("(no outlet species selected)")
+
     # snapshot stores outlet columns as derived.outlet.<species>
     state_cols = [c for c in df.columns if c.startswith("liquid.") or c.startswith("vapor.")]
-    outlet_cols = [c for c in df.columns if c.startswith("derived.outlet.")]
+    conc_cols = [c for c in df.columns if c.startswith("conc.")]
     derived_cols = [c for c in df.columns if c.startswith("derived.") and not c.startswith("derived.stream.") and not c.startswith("derived.outlet.")]
-    all_reactor_cols = state_cols + outlet_cols + derived_cols
+    all_reactor_cols = state_cols + conc_cols + derived_cols
 
     if all_reactor_cols:
         st.subheader("Reactor / Output")

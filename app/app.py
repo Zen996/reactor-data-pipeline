@@ -45,7 +45,8 @@ def _save_last_config(config) -> None:
         "dt": config.dt,
         "duration": config.duration,
         "seed": config.seed,
-        "volume": config.volume,
+        "max_volume": config.max_volume,
+        "min_volume": config.min_volume,
     }
     st.session_state["last_config"] = cfg_dict
 

@@ -123,6 +123,7 @@ class ReactorState:
         }
         for name, qty in self.liquid.items():
             row[f"liquid.{name}"] = qty
+            row[f"conc.{name}"] = qty / self.volume if self.volume > 0 else 0.0
         for name, qty in self.vapor.items():
             row[f"vapor.{name}"] = qty
         for key, val in self.derived.items():

@@ -123,7 +123,8 @@ Sensors **never modify** the physical state — they only add derived readings.
 | **dt** | Timestep in seconds.  Smaller = more accurate but more steps. |
 | **Duration** | Total simulation time in seconds |
 | **Seed** | RNG seed for reproducible stochastic runs (noise signals).  Set to 0 for non-deterministic runs. |
-| **Volume** | Reactor volume (litres / arbitrary units consistent with your species quantities) |
+| **Max volume** | Initial reactor volume (litres / arbitrary units consistent with your species quantities). The reactor starts at this volume. |
+| **Min volume** | Outflow is **disabled** while `volume ≤ min_volume`. The tank must fill above this level before the outlet opens. Set to 0 (default) for immediate outflow. |
 
 ---
 
@@ -168,18 +169,25 @@ Editable sections (click to expand):
 One line per stream showing its flow rate over time.  Checkboxes let you
 show/hide individual streams.
 
-#### Reactor / Output
+#### Outlet
+
+One line per species showing its **outlet mass flow rate** over time
+(`derived.outlet.<species>`).  Checkboxes let you show/hide individual
+species.  This is a **rate** (mass/time or moles/time), not a quantity
+— compare with the `liquid.*` inventory in the reactor section.
+
+#### Reactor
 
 Multi-select any combination of columns to plot:
 
 - `liquid.<species>` — **Quantity** (mass or moles) of that species
   currently in the reactor's liquid phase at that instant
-- `vapor.<species>` — Same for the vapour phase
-- `outlet.<species>` — **Outlet mass flow rate** (mass/time or
-  moles/time) of the species leaving the reactor.  Calculated as:
-  `outflow_rate × (liquid.<species> / volume)`.  This is a **rate**,
-  not a quantity — compare with `liquid.<species>` which is the tank
-  inventory.
+- `conc.<species>` — **Absolute concentration** of that species
+  (`liquid.<species> / volume`).  Same unit as your composition signals.
+  These are **not** normalized fractions — they will not sum to 1 unless
+  your total mass/volume ratio happens to be 1.  The sum of all
+  `conc.*` values equals `total_mass / volume`.
+- `vapor.<species>` — Same as `liquid.*` for the vapour phase
 - `derived.stream.<name>.flow_rate` — Same as the input-stream chart
 - `derived.stream.<name>.inflow.<species>` — Inflow rate of a species
   from a specific stream (flow × composition)

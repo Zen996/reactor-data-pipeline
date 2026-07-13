@@ -56,7 +56,7 @@ def build_experiment(config: SimulationConfig) -> BuiltExperiment:
     rm = RandomManager(config.seed) if config.seed is not None else RandomManager(None)
 
     state = ReactorState()
-    state.volume = config.volume
+    state.volume = config.max_volume
     for sp in config.species:
         state.register_species(sp.name, sp.phase, sp.initial_quantity)
 
@@ -84,7 +84,7 @@ def build_experiment(config: SimulationConfig) -> BuiltExperiment:
         outflow_rate = build_signal(config.outflow_rate, rm, "outflow")
     else:
         outflow_rate = config.outflow_rate
-    processes.append(MixingProcess(streams=streams, outflow_rate=outflow_rate))
+    processes.append(MixingProcess(streams=streams, outflow_rate=outflow_rate, min_volume=config.min_volume))
 
     reactions: list[Reaction] = []
     for rc in config.reactions:
@@ -247,7 +247,7 @@ def build_engine(config: SimulationConfig) -> SimulationEngine:
     rm = RandomManager(config.seed) if config.seed is not None else RandomManager(None)
 
     state = ReactorState()
-    state.volume = config.volume
+    state.volume = config.max_volume
     for sp in config.species:
         state.register_species(sp.name, sp.phase, sp.initial_quantity)
 
@@ -277,7 +277,7 @@ def build_engine(config: SimulationConfig) -> SimulationEngine:
         outflow_rate = build_signal(config.outflow_rate, rm, "outflow")
     else:
         outflow_rate = config.outflow_rate
-    processes.append(MixingProcess(streams=streams, outflow_rate=outflow_rate))
+    processes.append(MixingProcess(streams=streams, outflow_rate=outflow_rate, min_volume=config.min_volume))
 
     if config.reactions:
         reactions = []

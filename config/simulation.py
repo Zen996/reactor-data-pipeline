@@ -32,7 +32,8 @@ class SimulationConfig:
     dt: float = 1.0
     duration: float = 100.0
     seed: int | None = None
-    volume: float = 1.0
+    max_volume: float = 1.0
+    min_volume: float = 0.0
     outflow_rate: float | dict | None = None
     recorder_output: str | None = None
 
