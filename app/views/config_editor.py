@@ -2,11 +2,15 @@ from __future__ import annotations
 
 import streamlit as st
 
+from config.presets import PRESETS
 from config.simulation import SimulationConfig
 
 
 def render() -> SimulationConfig | None:
     with st.sidebar:
+        st.subheader("Quick Setup")
+        _render_preset_buttons()
+
         st.subheader("Species")
         n_species = st.number_input(
             "Number of species", min_value=0, max_value=10, value=1, key="n_species"
@@ -310,6 +314,21 @@ def _parse_species_dict_optional(text: str) -> dict[str, int] | None:
     if not text:
         return None
     return _parse_species_dict(text)
+
+
+def _render_preset_buttons() -> None:
+    """Show quick-setup buttons that pre-fill the config form from presets."""
+    col1, col2 = st.columns(2)
+    preset_names = list(PRESETS.keys())
+    mid = (len(preset_names) + 1) // 2
+    for idx, name in enumerate(preset_names):
+        col = col1 if idx < mid else col2
+        label = name.replace("_", " ").title()
+        with col:
+            if st.button(label, key=f"preset_{name}", use_container_width=True):
+                cfg = PRESETS[name]
+                prefill_session_state(cfg)
+                st.rerun()
 
 
 def prefill_session_state(cfg: dict) -> None:
