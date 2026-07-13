@@ -155,19 +155,17 @@ class TestReactorState:
         state.register_species("A", phase="liquid")
         assert state.get("A") == 0.0
 
-    def test_add_creates_species_if_missing(self) -> None:
-        """add() auto-creates a species with 0.0 if not yet present."""
+    def test_add_raises_if_not_registered(self) -> None:
+        """add() on an unregistered species raises KeyError."""
         state = ReactorState()
-        state.add("A", 5.0, phase="liquid")
-        assert state.get("A") == 5.0
-        state.add("A", -3.0, phase="liquid")
-        assert state.get("A") == 2.0
+        with pytest.raises(KeyError, match="Species 'A' not found"):
+            state.add("A", 5.0, phase="liquid")
 
-    def test_set_creates_species_if_missing(self) -> None:
-        """set() auto-creates a species entry."""
+    def test_set_raises_if_not_registered(self) -> None:
+        """set() on an unregistered species raises KeyError."""
         state = ReactorState()
-        state.set("A", 42.0, phase="liquid")
-        assert state.get("A") == 42.0
+        with pytest.raises(KeyError, match="Species 'A' not found"):
+            state.set("A", 42.0, phase="liquid")
 
     def test_total_mass_empty(self) -> None:
         """total_mass on empty state returns 0."""

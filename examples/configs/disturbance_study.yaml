@@ -1,0 +1,57 @@
+species:
+  - name: A
+    phase: liquid
+    initial_quantity: 5.0
+  - name: B
+    phase: liquid
+    initial_quantity: 0.0
+
+streams:
+  - name: feed
+    phase: liquid
+    flow_signal:
+      type: constant
+      value: 0.5
+    composition:
+      A:
+        type: sinusoid
+        amplitude: 0.3
+        frequency: 0.05
+        offset: 1.0
+
+reactions:
+  - reactants:
+      A: 1
+    products:
+      B: 1
+    rate_constant: 0.2
+
+manipulations:
+  - trigger:
+      type: time
+      time: 50.0
+    action:
+      type: inject
+      phase: liquid
+      species: A
+      amount: 2.0
+    one_shot: true
+
+sensors:
+  - species: A
+    phase: liquid
+    noise:
+      type: gaussian_noise
+      std: 0.05
+    output_key: sensor_A
+  - species: B
+    phase: liquid
+    noise:
+      type: gaussian_noise
+      std: 0.02
+    output_key: sensor_B
+
+dt: 0.5
+duration: 100.0
+seed: 7
+volume: 1.0

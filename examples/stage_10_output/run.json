@@ -1,0 +1,10 @@
+{
+  "dt": 0.1,
+  "duration": 10.0,
+  "species": [
+    "A",
+    "B",
+    "C"
+  ],
+  "description": "CSTR demo \u2014 mixing + reaction + sensor noise"
+}

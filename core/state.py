@@ -66,6 +66,7 @@ class ReactorState:
 
     def set(self, species: str, value: float, phase: str = "liquid") -> None:
         """Set *species* to *value*. Intended for initialisation / tests."""
+        self.get(species, phase)  # raises if unregistered
         self._phase_dict(phase)[species] = value
 
     def add(self, species: str, delta: float, phase: str = "liquid") -> None:
@@ -74,8 +75,8 @@ class ReactorState:
         Does **not** clamp negative values — that is a per-process
         decision.
         """
-        d = self._phase_dict(phase)
-        d[species] = d.get(species, 0.0) + delta
+        self.get(species, phase)  # raises if unregistered
+        self._phase_dict(phase)[species] += delta
 
     def concentration(self, species: str, phase: str = "liquid") -> float:
         """Quantity of *species* divided by current volume.
