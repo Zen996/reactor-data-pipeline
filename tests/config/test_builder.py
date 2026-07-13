@@ -200,3 +200,67 @@ class TestBuildSignal:
         val1 = sig1.value(0.0)
         val2 = sig2.value(0.0)
         assert val1 != val2
+
+
+class TestTwoFeedReaction:
+    """End-to-end: two steady feed streams of A and B react to produce C."""
+
+    def test_two_feeds_produce_c(self) -> None:
+        """A + 2B → C with steady feeds of A and B should yield C in the output."""
+        cfg = SimulationConfig(
+            species=[
+                SpeciesConfig(name="A", phase="liquid", initial_quantity=0.0),
+                SpeciesConfig(name="B", phase="liquid", initial_quantity=0.0),
+                SpeciesConfig(name="C", phase="liquid", initial_quantity=0.0),
+            ],
+            streams=[
+                {
+                    "name": "feed_A",
+                    "phase": "liquid",
+                    "flow_signal": {"type": "constant", "value": 0.5},
+                    "composition": {"A": {"type": "constant", "value": 2.0}},
+                    "active": True,
+                },
+                {
+                    "name": "feed_B",
+                    "phase": "liquid",
+                    "flow_signal": {"type": "constant", "value": 0.5},
+                    "composition": {"B": {"type": "constant", "value": 1.0}},
+                    "active": True,
+                },
+            ],
+            reactions=[
+                ReactionConfig(
+                    reactants={"A": 1, "B": 2},
+                    products={"C": 1},
+                    rate_constant=0.2,
+                )
+            ],
+            dt=0.2,
+            duration=10.0,
+            seed=42,
+        )
+        engine = build_engine(cfg)
+        engine.run()
+        df = engine._config_recorder.to_dataframe()
+
+        # All three species should be present as recorded columns
+        assert "liquid.A" in df.columns
+        assert "liquid.B" in df.columns
+        assert "liquid.C" in df.columns
+
+        # C should have been produced (positive quantity at the end)
+        assert df["liquid.C"].iloc[-1] > 0.0
+
+        # Feed stream flow rates should have been recorded
+        assert "derived.stream.feed_A.flow_rate" in df.columns
+        assert "derived.stream.feed_B.flow_rate" in df.columns
+
+        # Per-species inflow rates should be present
+        assert "derived.stream.feed_A.inflow.A" in df.columns
+        assert "derived.stream.feed_B.inflow.B" in df.columns
+
+        # Outlet species should be recorded
+        assert "derived.outlet.A" in df.columns
+        assert "derived.outlet.B" in df.columns
+        assert "derived.outlet.C" in df.columns

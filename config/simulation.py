@@ -33,6 +33,7 @@ class SimulationConfig:
     duration: float = 100.0
     seed: int | None = None
     volume: float = 1.0
+    outflow_rate: float | dict | None = None
     recorder_output: str | None = None
 
     @staticmethod

@@ -48,12 +48,13 @@ class DecayProcess(Process):
             return
 
         accumulated: dict[str, float] = {}
-        total_extent = 0.0
 
-        for rule in self._rules:
+        for i, rule in enumerate(self._rules):
             conc = state.concentration(rule.species, phase=rule.phase)
             rate = rule.rate_constant * conc
             extent = rate * dt  # concentration units
+
+            state.derived[f"decay_rate_{rule.species}"] = rate
 
             # clamp so decaying species doesn't go negative
             qty = state.get(rule.species, phase=rule.phase)
@@ -72,14 +73,7 @@ class DecayProcess(Process):
                     accumulated.get(prod_species, 0.0) + prod_delta
                 )
 
-            total_extent += extent
-
         for species, delta in accumulated.items():
             if species not in state.liquid and species not in state.vapor:
                 state.register_species(species, phase="liquid", initial=0.0)
             state.add(species, delta)
-
-        state.derived.setdefault("decay_rates", {})
-        for i, rule in enumerate(self._rules):
-            rate = rule.rate_constant * state.concentration(rule.species, phase=rule.phase)
-            state.derived["decay_rates"][rule.species] = rate

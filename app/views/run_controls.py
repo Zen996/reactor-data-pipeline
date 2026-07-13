@@ -29,18 +29,15 @@ def render(experiment, checkpoints: CheckpointStore) -> None:
     with col_a:
         if st.button("▶ Step once", key="step_once"):
             _advance_one(experiment, checkpoints)
-            st.rerun()
     with col_b:
         if st.button("▶▶ Advance", key="advance"):
             _advance_to(experiment, checkpoints, target)
-            st.rerun()
     with col_c:
         st.button("⏮ Rewind", key="rewind_btn", on_click=_do_rewind, args=(experiment, checkpoints))
     with col_d:
         if st.button("Reset", key="reset_btn"):
             from app.session import reset as session_reset
             session_reset()
-            st.rerun()
 
     _has_stochastic = _check_stochastic(experiment)
     if _has_stochastic:
@@ -83,7 +80,6 @@ def _do_rewind(experiment, checkpoints) -> None:
     for m in experiment.manipulations:
         if m.fired_at is not None and m.fired_at > landed_time:
             m.fired_at = None
-    st.rerun()
 
 
 def _check_stochastic(experiment) -> bool:

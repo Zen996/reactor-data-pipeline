@@ -67,6 +67,7 @@ class TestThresholdTrigger:
         one_shot=True."""
         state = ReactorState(volume=1.0, time=0.0)
         state.register_species("A", initial=0.0)
+        state.register_species("B", initial=0.0)
 
         m = Manipulation(
             trigger=ThresholdTrigger(

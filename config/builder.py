@@ -78,7 +78,13 @@ def build_experiment(config: SimulationConfig) -> BuiltExperiment:
         streams.append(stream)
 
     processes: list = []
-    processes.append(MixingProcess(streams=streams))
+
+    outflow_rate: Signal | float | None = None
+    if isinstance(config.outflow_rate, dict):
+        outflow_rate = build_signal(config.outflow_rate, rm, "outflow")
+    else:
+        outflow_rate = config.outflow_rate
+    processes.append(MixingProcess(streams=streams, outflow_rate=outflow_rate))
 
     reactions: list[Reaction] = []
     for rc in config.reactions:
@@ -265,7 +271,13 @@ def build_engine(config: SimulationConfig) -> SimulationEngine:
         streams.append(stream)
 
     processes = []
-    processes.append(MixingProcess(streams=streams))
+
+    outflow_rate: Signal | float | None = None
+    if isinstance(config.outflow_rate, dict):
+        outflow_rate = build_signal(config.outflow_rate, rm, "outflow")
+    else:
+        outflow_rate = config.outflow_rate
+    processes.append(MixingProcess(streams=streams, outflow_rate=outflow_rate))
 
     if config.reactions:
         reactions = []

@@ -11,18 +11,42 @@ def render(experiment) -> None:
         st.info("No data recorded yet. Advance the simulation to see charts.")
         return
 
-    input_cols = [c for c in df.columns if c.startswith("stream.") and c.endswith(".flow_rate")]
+    # snapshot stores stream columns as derived.stream.<name>.flow_rate
+    input_cols = [c for c in df.columns if c.startswith("derived.stream.") and c.endswith(".flow_rate")]
     if input_cols:
         st.subheader("Input Streams")
-        fig, ax = plot_timeseries(df, input_cols)
-        st.pyplot(fig)
+        # column format: derived.stream.<stream_name>.flow_rate
+        stream_names = sorted(set(c.split(".")[2] for c in input_cols))
+        selected = []
+        for sname in stream_names:
+            col_key = f"chart_show_stream_{sname}"
+            if col_key not in st.session_state:
+                st.session_state[col_key] = True
+            if st.checkbox(sname, value=True, key=col_key):
+                selected.append(sname)
+        if selected:
+            cols_to_plot = [f"derived.stream.{s}.flow_rate" for s in selected]
+            fig, ax = plot_timeseries(df, cols_to_plot)
+            st.pyplot(fig)
+        else:
+            st.caption("(no streams selected)")
 
+    # snapshot stores outlet columns as derived.outlet.<species>
     state_cols = [c for c in df.columns if c.startswith("liquid.") or c.startswith("vapor.")]
-    outlet_cols = [c for c in df.columns if c.startswith("outlet.")]
-    derived_cols = [c for c in df.columns if c.startswith("derived.") and not c.startswith("derived.stream.")]
-    plot_cols = state_cols + outlet_cols + derived_cols
+    outlet_cols = [c for c in df.columns if c.startswith("derived.outlet.")]
+    derived_cols = [c for c in df.columns if c.startswith("derived.") and not c.startswith("derived.stream.") and not c.startswith("derived.outlet.")]
+    all_reactor_cols = state_cols + outlet_cols + derived_cols
 
-    if plot_cols:
+    if all_reactor_cols:
         st.subheader("Reactor / Output")
-        fig, ax = plot_timeseries(df, plot_cols)
-        st.pyplot(fig)
+        selected = st.multiselect(
+            "Columns to show",
+            options=all_reactor_cols,
+            default=list(all_reactor_cols),
+            key="reactor_col_multiselect",
+        )
+        if selected:
+            fig, ax = plot_timeseries(df, selected)
+            st.pyplot(fig)
+        else:
+            st.caption("(no columns selected)")

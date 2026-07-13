@@ -18,6 +18,64 @@ from app.views.run_controls import render as render_run_controls
 st.set_page_config(layout="wide")
 st.title("CSTR Simulation GUI")
 
+
+# ---------------------------------------------------------------------------
+# Helpers for the restart / edit workflow
+# ---------------------------------------------------------------------------
+
+def _save_last_config(config) -> None:
+    """Store a serialisable copy of the config dict for restart/edit."""
+    import dataclasses
+    from config.reactions import DecayConfig, EquilibriumConfig, ReactionConfig
+    from config.species import SpeciesConfig
+
+    def _as_dict(obj):
+        if isinstance(obj, (SpeciesConfig, ReactionConfig, DecayConfig, EquilibriumConfig)):
+            return dataclasses.asdict(obj)
+        return obj
+
+    cfg_dict = {
+        "species": [_as_dict(s) for s in config.species],
+        "streams": list(config.streams),
+        "reactions": [_as_dict(r) for r in config.reactions],
+        "decays": [_as_dict(d) for d in config.decays],
+        "equilibria": [_as_dict(e) for e in config.equilibria],
+        "sensors": list(config.sensors),
+        "outflow_rate": config.outflow_rate,
+        "dt": config.dt,
+        "duration": config.duration,
+        "seed": config.seed,
+        "volume": config.volume,
+    }
+    st.session_state["last_config"] = cfg_dict
+
+
+def _do_restart() -> None:
+    """Rebuild the experiment from the saved config without showing the editor."""
+    last = st.session_state.get("last_config")
+    if last is None:
+        return
+    from config.simulation import SimulationConfig
+    from config.builder import build_experiment
+    cfg = SimulationConfig.from_dict(last)
+    exp = build_experiment(cfg)
+    set_experiment(exp)
+    _save_last_config(cfg)
+
+
+def _do_edit(last_cfg: dict) -> None:
+    """Clear the experiment and pre-fill session_state so the config editor
+    shows the saved values, allowing the user to modify them."""
+    from app.views.config_editor import prefill_session_state
+    session_reset()
+    prefill_session_state(last_cfg)
+    st.rerun()
+
+
+# ---------------------------------------------------------------------------
+# Main app logic
+# ---------------------------------------------------------------------------
+
 experiment = get_experiment()
 
 if experiment is None:
@@ -25,15 +83,24 @@ if experiment is None:
     config = render_config_editor()
     if config is not None:
         from config.builder import build_experiment
-        exp = build_experiment(config)
-        set_experiment(exp)
-        st.rerun()
-else:
+        experiment = build_experiment(config)
+        set_experiment(experiment)
+        _save_last_config(config)
+
+if experiment is not None:
     st.sidebar.header("Experiment Active")
+
+    col_restart, col_edit = st.sidebar.columns(2)
+    with col_restart:
+        if st.button("Restart", key="sidebar_restart", type="primary"):
+            _do_restart()
+    with col_edit:
+        last_cfg = st.session_state.get("last_config")
+        if last_cfg is not None and st.button("Edit Config", key="sidebar_edit"):
+            _do_edit(last_cfg)
 
     if st.sidebar.button("Reset", key="sidebar_reset"):
         session_reset()
-        st.rerun()
 
     df = experiment.recorder.to_dataframe()
     if not df.empty:
@@ -55,7 +122,7 @@ else:
     checkpoints = st.session_state.get("checkpoints")
     if checkpoints is not None:
         st.sidebar.number_input(
-            "Rewind target time", value=0.0, min_value=0.0,
+            "Rewind target time", value=0.0,
             key="rewind_target",
         )
 
