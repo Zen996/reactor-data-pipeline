@@ -172,9 +172,10 @@ show/hide individual streams.
 #### Outlet
 
 One line per species showing its **outlet mass flow rate** over time
-(`derived.outlet.<species>`).  Checkboxes let you show/hide individual
-species.  This is a **rate** (mass/time or moles/time), not a quantity
-— compare with the `liquid.*` inventory in the reactor section.
+(`derived.outlet.<species>`), plus a **total** line summing all species.
+Checkboxes let you show/hide individual species.  This is a **rate**
+(mass/time or moles/time), not a quantity — compare with the `liquid.*`
+inventory in the reactor section.
 
 #### Reactor
 
@@ -214,6 +215,7 @@ computed during each timestep for monitoring and analysis.  They do
 | `derived.stream.<name>.flow_rate` | MixingProcess | Volumetric flow rate of a feed stream |
 | `derived.stream.<name>.inflow.<species>` | MixingProcess | Inflow rate of a species via a feed stream |
 | `derived.outlet.<species>` | MixingProcess | **Outlet mass flow rate** (mass/time or moles/time). `outflow_rate × liquid_qty / volume`. This is a **rate**, distinct from `liquid.<species>` which is the tank inventory. |
+| `derived.outlet.total` | MixingProcess | Sum of all species outlet rates. Total mass (or moles) leaving the reactor per unit time. |
 | `derived.reaction_rate_<i>` | ReactionProcess | Reaction progress per unit time (conc/s) |
 | `derived.decay_rate_<species>` | DecayProcess | Decay rate (conc/s), first-order |
 | `derived.equilibrium_net_<species>` | EquilibriumProcess | Net liquid→vapour transfer rate (conc/s) |

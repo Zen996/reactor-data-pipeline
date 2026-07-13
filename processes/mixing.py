@@ -97,9 +97,13 @@ class MixingProcess(Process):
             for species, rate in inp.items():
                 state.derived[f"stream.{name}.inflow.{species}"] = rate
 
+        outlet_total = 0.0
         for species in list(state.liquid.keys()):
             conc = state.liquid[species] / state.volume if state.volume > 0 else 0.0
-            state.derived[f"outlet.{species}"] = outflow * conc
+            rate = outflow * conc
+            state.derived[f"outlet.{species}"] = rate
+            outlet_total += rate
+        state.derived["outlet.total"] = outlet_total
 
         state.inflows = aggregated_inflows
         state.outflow_rate = outflow
